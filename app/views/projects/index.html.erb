@@ -1,0 +1,101 @@
+<h2>Listing Projects</h2>
+
+<ul id="projectsList">
+
+</ul>
+
+<h2>Add Project</h2>
+<form action="#" method="post" id="form">
+	<span id="errors">
+	</span>
+	<label for="name"> Name : </label><br/>
+	<input type="text" name="name" id="name" /><br/>
+
+	<label for="startDate"> Start Date : </label><br/>
+	<input type="date" name="start_date" id="startDate" /><br/>
+
+	<label for="client"> Client : </label><br/>
+	<select id="client" name="client">
+		<option value="">Select</option>
+	</select><br/>
+	<input type="submit" value="Add Project"> 
+</form>
+
+<script>
+	var projectsListHandle = document.getElementById('projectsList');
+	var formHandle = document.getElementById('form');
+	var clientHandle = document.getElementById('client');
+	var nameHandle = document.getElementById('name');
+	var startDateHandle = document.getElementById('startDate');
+	var errorsHandle = document.getElementById('errors');
+
+	var xhrProject = new XMLHttpRequest();
+	xhrProject.open('GET', '../api/v1/projects', true);
+	xhrProject.onreadystatechange = function(){
+		if(xhrProject.readyState == 4 && xhrProject.status == 200){
+			var projects = JSON.parse(xhrProject.responseText);
+			projects.forEach(function(project){
+				var li = document.createElement('li'); // <li> </li>;
+				var text = document.createTextNode(project.name); // project1 
+				li.appendChild(text); // <li>project1</li>;
+				projectsListHandle.appendChild(li); // <ul><li>project1</li></ul>
+			});
+		}
+	}
+	xhrProject.send();
+
+var xhrClient = new XMLHttpRequest();
+xhrClient.open('GET','../api/v1/clients');
+xhrClient.onreadystatechange = function(){
+	if(xhrClient.readyState == 4 && xhrClient.status == 200){
+		var response = JSON.parse(xhrClient.responseText);
+		response.forEach(function(response){
+			var option = document.createElement('option');
+			var value = document.createAttribute('value');
+			value.value = response.id;
+			option.setAttributeNode(value);
+			var text = document.createTextNode(response.name);
+			option.appendChild(text);
+			clientHandle.appendChild(option);
+		});
+	}
+}
+xhrClient.send();
+	
+formHandle.addEventListener('submit', function(e)
+{
+	e.preventDefault();
+	var formData = {
+		project : {
+			name: nameHandle.value,
+			start_date: startDateHandle.value,
+			client_id: clientHandle.value
+		}
+	}
+	var xhr = new XMLHttpRequest();
+	xhr.open('POST','../api/v1/projects',true);
+	xhr.setRequestHeader('Content-Type', "application/json");
+	xhr.onreadystatechange = function()
+	{
+		if(xhr.readyState == 4 && xhr.status == 200)
+		{
+			var response = JSON.parse(xhr.responseText);
+			if(response.hasOwnProperty('id'))
+			{
+				var li = document.createElement('li');
+				var litext = document.createTextNode(response.name);
+				li.appendChild(litext);
+				projectsListHandle.appendChild(li);
+				errorsHandle.innerHTML = "";
+				formHandle.reset();
+			}
+			else
+			{
+				errorsHandle.innerHTML = response.errors.join(", ");
+			}
+		}
+	}
+	xhr.send(JSON.stringify(formData));
+},false);
+
+</script>

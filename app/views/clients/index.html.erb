@@ -1,0 +1,70 @@
+
+<h2>Listing Clients</h2>
+<ol id="clientList">
+	<% @clients.each do |client| %>
+		<li><%=client.name%></li>
+	<% end %>
+</ol>
+
+<h2>Add Client</h2>
+
+<form action="#" method="post" id="clientForm">
+
+	<div id="errors">
+		
+	</div>
+
+	<label for="client_name">Name</label><br/>
+	<input type="text" id="client_name" name="name" /><br/>
+
+	<label for="client_email">Email</label><br/>
+	<input type="text" id="client_email" name="email" /><br/>
+
+	<label for="client_company">Company</label><br/>
+	<input type="text" id="client_company" name="company"><br/>
+
+	<input type="submit" value="Add Client" />
+
+</form>
+
+<script>
+	var clientListHandle = document.getElementById('clientList');
+	var clientFormHandle = document.getElementById('clientForm');
+	var errorsHandle = document.getElementById('errors');
+	var nameHandle = document.getElementById('client_name');
+	var emailHandle = document.getElementById('client_email');
+	var companyHandle = document.getElementById('client_company');
+
+	clientFormHandle.addEventListener('submit',function(e){
+		e.preventDefault();
+		var formData = {
+			client: {
+				name : nameHandle.value,
+				email : emailHandle.value,
+				company : companyHandle.value
+			}
+		}
+
+		var xhr= new XMLHttpRequest();
+		xhr.open('POST','../api/v1/clients');
+		xhr.setRequestHeader("Content-Type", "application/json");
+		xhr.onreadystatechange = function(){
+			if(xhr.readyState == 4 && xhr.status == 200){
+				var client = JSON.parse(xhr.responseText);
+				if(client.hasOwnProperty('errors')){
+					errorsHandle.innerHTML = client.errors.join(", ");
+				}else{
+					var li = document.createElement('li');
+					var text = document.createTextNode(client.name);
+					li.appendChild(text);
+					clientListHandle.appendChild(li);
+
+					errorsHandle.innerHTML = "";
+					clientFormHandle.reset();
+				}
+			}
+		}
+
+		xhr.send(JSON.stringify(formData));
+	},false);
+</script>

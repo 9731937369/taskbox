@@ -1,0 +1,10 @@
+<h2>Enter the City</h2>
+<%= form_tag '/weather/current', method: :get do %>
+	<label> City </label>
+	<%= text_field_tag :name, params[:name] %> <br/>
+	<%= submit_tag %>
+<% end %>
+
+<% if !@response.nil? %>
+	<p> Current Temperature is <%= @response["main"]["temp"] %>
+<% end%>

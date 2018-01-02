@@ -1,0 +1,46 @@
+1. rails new taskbox 
+2. rails g model Client name:string email:string company:string
+3. rake db:migrate
+4. add validations in client.rb 
+	validates_presence_of :name, :email, :company
+	validates_uniqueness_of :email
+5. rails generate controller Clients 
+6. resources :clients
+7. in clients_controller 
+
+   def index
+	@clients = Client.all
+   end
+8. in app/views/clients/ create index.html.erb
+	<h2>Listing Clients</h2>
+
+	<ol>
+		<% @clients.each do |client| %>
+			<li><%= client.name %></li>
+		<% end %>
+	</ol>
+
+
+ACCESS DATA AS JSON VIA API
+
+1. create api folder in controllers
+2. inside api create another folder v1
+3. inside v1 create a file clients_controller.rb
+4. 
+
+ class Api::V1::ClientsController < ApplicationController
+  def index
+  	@clients = Client.all
+  	render json: @clients
+  end
+end
+
+5. in routes 
+
+   namespace :api, default: ‘json’ do 
+	namespace :v1 do 
+		resources :clients 
+	end
+   end
+
+6. goto localhost:3000/api/v1/clients 
